@@ -2,6 +2,8 @@
 <!-- V18 : PDF en 3 pages (intro / 6 axes / recommandations), bloc WeNego en pied de la page résultat, mini-radar avec contour cible + légende, radar compact repliable sur mobile -->
 <!-- V19 : sans titre « Synthèse » sur la page résultat, stats footer réordonnées (15 ans / 1500+ / 150+), pas de bouton Accueil en dernière page, bloc WeNego ajouté en pied du rapport PDF -->
 <!-- V20 : texte WeNego du pied de page sur 3 lignes (desktop), CTA « échange gratuit de 30 min » + email contact@wenego.fr en pied de la page résultat et du rapport PDF -->
+<!-- V24 : CTA en texte seul (sans bouton) dans une carte au-dessus du bloc WeNego, page résultat ET rapport PDF -->
+<!-- V23 : CTA « échange gratuit de 30 min » présenté en carte (titre, texte, bouton doré, email) au-dessus du bloc WeNego -->
 <!-- V22 : image d'accueil pixel-art et logo WeNego intégrés (data URI), logo aussi utilisé dans le PDF -->
 <!-- V21 : sur la page résultat, la ligne CTA « échange gratuit de 30 min » est sortie du bloc WeNego et placée juste au-dessus, sans séparateur -->
 <!-- V17 : dans chaque axe, « Recommandations : » + titre de la reco sur une seule ligne -->
@@ -207,12 +209,16 @@
   .xp .recbox .lead{margin:0 0 6px; font-weight:700; font-style:italic; color:var(--navy)}
   .xp .recbox .lead .rech{font-style:normal; color:var(--gold)}
 
-  /* V21 : ligne CTA « échange gratuit de 30 min », au-dessus du bloc WeNego, sans séparateur */
-  .about-contact{margin-top:26px}
-  .about-contact p{margin:0; line-height:1.6; color:var(--anth)}
-  .about-contact a{color:var(--navy); font-weight:700; text-decoration:none; white-space:nowrap}
-  .about-contact a:hover{text-decoration:underline}
-  .about-contact a:focus-visible{outline:2px solid var(--gold); outline-offset:2px; border-radius:3px}
+  /* V24 : carte CTA « échange gratuit de 30 min », au-dessus du bloc WeNego (texte seul, sans bouton) */
+  .cta-call{margin-top:26px; display:flex; align-items:center; gap:18px;
+    padding:18px 24px; background:var(--card); border:2px solid var(--gold); border-radius:12px}
+  .cta-call .cta-ico{width:48px; height:48px; border-radius:50%; background:var(--navy-soft); color:var(--navy); display:flex; align-items:center; justify-content:center; flex:none}
+  .cta-call .cta-ico svg{width:22px; height:22px}
+  .cta-call p{margin:0; line-height:1.6; color:var(--anth)}
+  .cta-call p a{color:var(--navy); font-weight:700; text-decoration:underline; text-decoration-color:var(--gold); text-decoration-thickness:2px; text-underline-offset:3px; white-space:nowrap}
+  .cta-call p a:hover{text-decoration-color:var(--navy)}
+  .cta-call p a:focus-visible{outline:2px solid var(--gold); outline-offset:2px; border-radius:3px}
+  @media (max-width:560px){ .cta-call{align-items:flex-start; padding:16px; gap:14px} .cta-call .cta-ico{width:40px; height:40px} }
 
   /* bloc WeNego (pied de la page résultat) */
   .about{margin-top:12px; background:#1B2A4A; color:#fff; border-radius:12px; padding:22px 26px}
@@ -519,7 +525,8 @@ const UI = {
     about:{text:"WeNego conçoit et anime des ateliers de négociation avancée, du coaching et du conseil pour les équipes achats, ventes et commerciales, afin de faire de la négociation une compétence reproductible et mesurable, au ROI immédiat.",
       stats:[["15 ans","D'existence"],["1500+","Négociateurs formés"],["150+","Ateliers animés"]],
       cta:"Visiter wenego.fr", url:"https://www.wenego.fr/?lang=fr",
-      contact:"Approfondissons vos résultats lors d'un échange gratuit de 30 min et construisons ensemble votre feuille de route IA & négociation. Contactez-nous à"},
+      contact:"Approfondissons vos résultats lors d'un échange gratuit de 30 min et construisons ensemble votre feuille de route IA & négociation. Contactez-nous à",
+      ctaH:"Approfondissons vos résultats",},
     fErrReq:"Merci de remplir tous les champs obligatoires.", fErrEmail:"Merci de saisir une adresse email valide.", fErrLib:"Le module PDF n'a pas pu se charger. Vérifiez votre connexion et réessayez.",
     pdfTitle:"Diagnostic de maturité IA", pdfFor:"Préparé pour", pdfCompany:"Entreprise", pdfEmail:"Email", pdfDate:"Date",
     pdfIntroH:"Introduction",
@@ -603,7 +610,8 @@ const UI = {
     about:{text:"WeNego designs and delivers advanced negotiation workshops, coaching and consultancy for procurement, sales and commercial teams, turning negotiation into a repeatable, measurable skill with immediate ROI.",
       stats:[["15 yrs","In negotiation"],["1500+","Negotiators trained"],["150+","Workshops delivered"]],
       cta:"Visit wenego.fr", url:"https://www.wenego.fr/?lang=en",
-      contact:"Let's go deeper into your results in a free 30 min conversation and build your AI & negotiation roadmap. Contact us at"},
+      contact:"Let's go deeper into your results in a free 30 min conversation and build your AI & negotiation roadmap. Contact us at",
+      ctaH:"Let's go deeper into your results",},
     fErrReq:"Please fill in all required fields.", fErrEmail:"Please enter a valid email address.", fErrLib:"The PDF module could not load. Check your connection and try again.",
     pdfTitle:"AI Maturity Diagnostic", pdfFor:"Prepared for", pdfCompany:"Company", pdfEmail:"Email", pdfDate:"Date",
     pdfIntroH:"Introduction",
@@ -819,7 +827,10 @@ function buildScreens(){
         <span class="fmsg" id="fmsg" role="status">${U.fNote}</span>
       </div>
     </div>
-    <div class="about-contact"><p>${esc(U.about.contact)} <a href="mailto:${CONTACT_EMAIL}">${esc(CONTACT_EMAIL)}</a></p></div>
+    <section class="cta-call" aria-label="${escAttr(U.about.ctaH)}">
+      <div class="cta-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M8 9h8M8 13h5"/></svg></div>
+      <p>${esc(U.about.contact)} <a href="mailto:${CONTACT_EMAIL}">${esc(CONTACT_EMAIL)}</a></p>
+    </section>
     <footer class="about" aria-label="WeNego">
       <div class="about-grid">
         <div class="about-text"><p>${esc(U.about.text)}</p></div>
@@ -1292,8 +1303,8 @@ function renderPdf(p,k){
 
   // ================= PAGE 3 : recommandations + bloc WeNego =================
   doc.addPage(); pageTop();
-  const ABOUT_H = 35, ABOUT_TOP = 24;   // bloc WeNego : partie haute (texte / chiffres / bouton) + ligne CTA
-  limit = BOTTOM - ABOUT_H - 4;          // place réservée au bloc WeNego
+  const ABOUT_H = 24, CTA_H = 13, CTA_GAP = 3;   // V24 : bloc WeNego + carte CTA au-dessus
+  limit = BOTTOM - ABOUT_H - CTA_GAP - CTA_H - 4; // place réservée aux deux blocs
   h2(R.recH);
   para(R.recSub, 8.6, MUTED, 'italic'); y+=1.2*k;
   R.rec.forEach((r,i)=>{
@@ -1317,7 +1328,7 @@ function renderPdf(p,k){
 
   // bloc WeNego (même contenu que le pied de la page résultat)
   {
-    const y0 = BOTTOM - ABOUT_H, H = ABOUT_TOP, tw = CW*0.52;
+    const y0 = BOTTOM - ABOUT_H, H = ABOUT_H, tw = CW*0.52;
     doc.setFillColor(...NAVY); doc.roundedRect(M, y0, CW, ABOUT_H, 2, 2, 'F');
     // texte
     doc.setFont('helvetica','normal'); doc.setFontSize(7.6); setC(WHITE);
@@ -1340,10 +1351,22 @@ function renderPdf(p,k){
     setC(NAVY); doc.text(label, bx+4, by+4.8);
     doc.link(bx, by, bw, 7, {url: U.about.url});
 
-    // V20 : CTA échange gratuit de 30 min + email
-    doc.setDrawColor(70,85,115); doc.setLineWidth(0.3); doc.line(M+5, y0+H, M+CW-5, y0+H);
-    const cw = CW-10, cst = stepOf(7.8,1.3), mail = CONTACT_EMAIL;
-    doc.setFont('helvetica','bold'); doc.setFontSize(7.8);
+  }
+
+  // V24 : carte CTA « échange gratuit de 30 min » (blanche, bordure dorée), juste au-dessus du bloc WeNego
+  {
+    const cy0 = BOTTOM - ABOUT_H - CTA_GAP - CTA_H;
+    doc.setFillColor(...WHITE); doc.setDrawColor(...GOLD); doc.setLineWidth(0.6);
+    doc.roundedRect(M, cy0, CW, CTA_H, 2, 2, 'FD');
+    // pastille icône
+    const ic = M+7.5, icy = cy0+CTA_H/2;
+    doc.setFillColor(...SOFT); doc.circle(ic, icy, 3.6, 'F');
+    doc.setDrawColor(...NAVY); doc.setLineWidth(0.4);
+    doc.roundedRect(ic-1.9, icy-1.6, 3.8, 2.6, 0.5, 0.5, 'S');
+    doc.line(ic-1.2, icy+1, ic-1.6, icy+1.9);
+    // texte + email
+    const tx = M+14, cw = CW-14-5, cst = stepOf(8.2,1.3), mail = CONTACT_EMAIL;
+    doc.setFont('helvetica','bold'); doc.setFontSize(8.2);
     const mailW = doc.getTextWidth(mail);
     doc.setFont('helvetica','normal');
     const cl = doc.splitTextToSize(T(U.about.contact), cw);
@@ -1351,11 +1374,12 @@ function renderPdf(p,k){
     const inline = lastW + mailW <= cw;
     const mailLine = inline ? cl.length-1 : cl.length;
     const nL = mailLine + 1;
-    const cy = y0 + H + (ABOUT_H - H - nL*cst)/2 + cst*0.75;
-    setC(WHITE);
-    cl.forEach((l,j)=>doc.text(l, M+5, cy + j*cst));
-    const mx = inline ? M+5+lastW : M+5, my = cy + mailLine*cst;
-    doc.setFont('helvetica','bold'); setC(GOLD); doc.text(mail, mx, my);
+    const ty0 = cy0 + (CTA_H - nL*cst)/2 + cst*0.75;
+    setC(INK);
+    cl.forEach((l,j)=>doc.text(l, tx, ty0 + j*cst));
+    const mx = inline ? tx+lastW : tx, my = ty0 + mailLine*cst;
+    doc.setFont('helvetica','bold'); setC(NAVY); doc.text(mail, mx, my);
+    doc.setDrawColor(...GOLD); doc.setLineWidth(0.4); doc.line(mx, my+0.9, mx+mailW, my+0.9);
     doc.link(mx, my-cst*0.75, mailW, cst, {url:'mailto:'+mail});
   }
 
