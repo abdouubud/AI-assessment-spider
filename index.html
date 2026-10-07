@@ -9,6 +9,7 @@
 <!-- V25 : rapport PDF — page « Questions et réponses » (questions posées + réponses choisies, note /4) insérée avant les recommandations -->
 <!-- V26 : slogan « Empowering people & organisations » sous le logo ; bloc WeNego (texte, chiffres, lien) ajouté sur la page d'accueil sous le bouton Commencer -->
 <!-- V27 : page élargie (accueil 1080px) et plus aérée (marges intérieures, espacements) -->
+<!-- V28 : rapport PDF en mise en page continue (plus d'espaces vides) ; retour à la ligne avant « Contactez-nous à » -->
 <!-- Logo : lien vers https://www.wenego.fr/?lang=en ou ?lang=fr selon la langue active -->
 <!DOCTYPE html>
 <html lang="en">
@@ -532,7 +533,7 @@ const UI = {
     about:{text:"WeNego conçoit et anime des ateliers de négociation avancée, du coaching et du conseil pour les équipes achats, ventes et commerciales, afin de faire de la négociation une compétence reproductible et mesurable, au ROI immédiat.",
       stats:[["15 ans","D'existence"],["1500+","Négociateurs formés"],["150+","Ateliers animés"]],
       cta:"Visiter wenego.fr", url:"https://www.wenego.fr/?lang=fr",
-      contact:"Approfondissons vos résultats lors d'un échange gratuit de 30 min et construisons ensemble votre feuille de route IA & négociation. Contactez-nous à",
+      contact:"Approfondissons vos résultats lors d'un échange gratuit de 30 min et construisons ensemble votre feuille de route IA & négociation.", contactAt:"Contactez-nous à",
       ctaH:"Approfondissons vos résultats",},
     fErrReq:"Merci de remplir tous les champs obligatoires.", fErrEmail:"Merci de saisir une adresse email valide.", fErrLib:"Le module PDF n'a pas pu se charger. Vérifiez votre connexion et réessayez.",
     pdfTitle:"Diagnostic de maturité IA", pdfFor:"Préparé pour", pdfCompany:"Entreprise", pdfEmail:"Email", pdfDate:"Date",
@@ -618,7 +619,7 @@ const UI = {
     about:{text:"WeNego designs and delivers advanced negotiation workshops, coaching and consultancy for procurement, sales and commercial teams, turning negotiation into a repeatable, measurable skill with immediate ROI.",
       stats:[["15 yrs","In negotiation"],["1500+","Negotiators trained"],["150+","Workshops delivered"]],
       cta:"Visit wenego.fr", url:"https://www.wenego.fr/?lang=en",
-      contact:"Let's go deeper into your results in a free 30 min conversation and build your AI & negotiation roadmap. Contact us at",
+      contact:"Let's go deeper into your results in a free 30 min conversation and build your AI & negotiation roadmap.", contactAt:"Contact us at",
       ctaH:"Let's go deeper into your results",},
     fErrReq:"Please fill in all required fields.", fErrEmail:"Please enter a valid email address.", fErrLib:"The PDF module could not load. Check your connection and try again.",
     pdfTitle:"AI Maturity Diagnostic", pdfFor:"Prepared for", pdfCompany:"Company", pdfEmail:"Email", pdfDate:"Date",
@@ -852,7 +853,7 @@ function buildScreens(){
     </div>
     <section class="cta-call" aria-label="${escAttr(U.about.ctaH)}">
       <div class="cta-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M8 9h8M8 13h5"/></svg></div>
-      <p>${esc(U.about.contact)} <a href="mailto:${CONTACT_EMAIL}">${esc(CONTACT_EMAIL)}</a></p>
+      <p>${esc(U.about.contact)}<br>${esc(U.about.contactAt)} <a href="mailto:${CONTACT_EMAIL}">${esc(CONTACT_EMAIL)}</a></p>
     </section>
     ${aboutBlock(U)}
   `;
@@ -1301,10 +1302,25 @@ function renderPdf(p,k){
     y+=boxH; chk();
   }
 
-  // ================= PAGE 2 : les 6 axes expliqués =================
-  doc.addPage(); pageTop();
+  // ================= V28 : mise en page continue (plus de pages à moitié vides) =================
+  // Chaque bloc est mesuré avant d'être dessiné ; on change de page uniquement s'il ne tient pas.
+  const ensure = (h)=>{ if(y + h > BOTTOM){ doc.addPage(); y = M; } };
+  const H2_H = 8.8*k;
+  const measure = (text, size, w, lh, style='normal')=>{
+    doc.setFont('helvetica', style); doc.setFontSize(size*k);
+    return doc.splitTextToSize(T(text), w).length * stepOf(size*k, lh);
+  };
+  const explainH = (e)=> 6.6*k + 1.6*k
+    + [[U.kDef,e.def],[U.kEx,e.ex],[U.kCrit,e.crit]].reduce((s,[kk,t])=> s + measure(kk+'  '+t, 8.8, CW-4, 1.28) + 0.5*k, 0)
+    + 2.6*k;
+  const recH = (r)=> 6.4*k + 1.4*k + r.items.reduce((s,t)=> s + measure(t, 8.4, CW-4.5, 1.26) + 0.3*k, 0) + 2*k;
+
+  // ---------- les 6 axes expliqués ----------
+  y += 4*k;
+  ensure(H2_H + explainH(U.explains[0]));
   h2(U.pdfAxesH); y+=0.5*k;
   U.explains.forEach((e,i)=>{
+    ensure(explainH(e));
     const bh=6.6*k;
     doc.setFillColor(...SOFT); doc.roundedRect(M, y, CW, bh, 1.5, 1.5, 'F');
     doc.setFont('helvetica','bold'); doc.setFontSize(9.6*k); setC(GOLD); doc.text((i+1)+'.', M+2.5, y+bh*0.68);
@@ -1314,14 +1330,12 @@ function renderPdf(p,k){
     [[U.kDef,e.def],[U.kEx,e.ex],[U.kCrit,e.crit]].forEach(([kk,t])=>{ rich([[kk+' ','b'],[t]], 8.8, M+2, CW-4); y+=0.5*k; });
     y+=2.6*k;
   });
-  chk();
 
-  // ================= V25 : QUESTIONS ET RÉPONSES (avant les recommandations) =================
-  doc.addPage(); pageTop();
+  // ---------- questions et réponses ----------
+  y += 2*k;
+  ensure(H2_H + 30*k);
   h2(U.pdfQAH);
   para(U.pdfQASub, 8.4, MUTED, 'italic'); y+=1.6*k;
-  const QA_BOTTOM = BOTTOM - 2;
-  const ensure = (h)=>{ if(y + h > QA_BOTTOM){ doc.addPage(); y = M; } };
   AXES.forEach((ax,i)=>{
     const bh = 6.4*k;
     ensure(bh + 14*k);                       // en-tête d'axe + au moins une question
@@ -1340,12 +1354,10 @@ function renderPdf(p,k){
       const aText = v ? opts[v-1] : U.pdfQANone;
       const aLines = doc.splitTextToSize(T(aText), aw);
       const qs = stepOf(qSize,1.28), as = stepOf(aSize,1.28);
-      ensure(qLines.length*qs + aLines.length*as + 3.4*k);
-      // question
+      ensure(qLines.length*qs + aLines.length*as + 3.6*k);
       doc.setFont('helvetica','bold'); doc.setFontSize(qSize); setC(NAVY);
       qLines.forEach(l=>{ doc.text(l, qx, y+qs*0.75); y+=qs; });
       y += 0.6*k;
-      // réponse : pastille dorée + texte + note
       const ay = y;
       doc.setFillColor(...(v ? GOLD : LINE)); doc.circle(M+5.5, ay+as*0.5, 1.1*k, 'F');
       doc.setFont('helvetica', v ? 'normal' : 'italic'); doc.setFontSize(aSize); setC(v ? INK : MUTED);
@@ -1358,13 +1370,13 @@ function renderPdf(p,k){
     y += 1.6*k;
   });
 
-  // ================= PAGE 3 : recommandations + bloc WeNego =================
-  doc.addPage(); pageTop();
-  const ABOUT_H = 24, CTA_H = 13, CTA_GAP = 3;   // V24 : bloc WeNego + carte CTA au-dessus
-  limit = BOTTOM - ABOUT_H - CTA_GAP - CTA_H - 4; // place réservée aux deux blocs
+  // ---------- recommandations ----------
+  y += 2*k;
+  ensure(H2_H + 10*k + recH(R.rec[0]));
   h2(R.recH);
   para(R.recSub, 8.6, MUTED, 'italic'); y+=1.2*k;
   R.rec.forEach((r,i)=>{
+    ensure(recH(r));
     const isPrio=A.priorities.some(x=>x.i===i), bh=6.4*k;
     doc.setFillColor(...SOFT); doc.roundedRect(M, y, CW, bh, 1.5, 1.5, 'F');
     if(isPrio){ doc.setFillColor(...GOLD); doc.rect(M, y, 2, bh, 'F'); }
@@ -1381,18 +1393,48 @@ function renderPdf(p,k){
     r.items.forEach(t=>bullet(t, 8.4));
     y+=2*k;
   });
-  chk();
+
+  // ---------- carte CTA + bloc WeNego, juste après le contenu ----------
+  const ABOUT_H = 24, CTA_GAP = 3;
+  const cst = stepOf(8.2,1.3), ctx = M+14, ccw = CW-14-5, mail = CONTACT_EMAIL;
+  doc.setFont('helvetica','normal'); doc.setFontSize(8.2);
+  const cl = doc.splitTextToSize(T(U.about.contact), ccw);           // 1re phrase
+  const CTA_H = (cl.length+1)*cst + 6;                                  // + ligne « Contactez-nous à … »
+  y += 2;
+  ensure(CTA_H + CTA_GAP + ABOUT_H);
+
+  // carte CTA (blanche, bordure dorée)
+  {
+    const cy0 = y;
+    doc.setFillColor(...WHITE); doc.setDrawColor(...GOLD); doc.setLineWidth(0.6);
+    doc.roundedRect(M, cy0, CW, CTA_H, 2, 2, 'FD');
+    const ic = M+7.5, icy = cy0+CTA_H/2;
+    doc.setFillColor(...SOFT); doc.circle(ic, icy, 3.6, 'F');
+    doc.setDrawColor(...NAVY); doc.setLineWidth(0.4);
+    doc.roundedRect(ic-1.9, icy-1.6, 3.8, 2.6, 0.5, 0.5, 'S');
+    doc.line(ic-1.2, icy+1, ic-1.6, icy+1.9);
+    const ty0 = cy0 + 3 + cst*0.75;
+    doc.setFont('helvetica','normal'); doc.setFontSize(8.2); setC(INK);
+    cl.forEach((l,j)=>doc.text(l, ctx, ty0 + j*cst));
+    // V28 : retour à la ligne avant « Contactez-nous à … »
+    const my = ty0 + cl.length*cst, atTxt = T(U.about.contactAt)+' ';
+    doc.text(atTxt, ctx, my);
+    const mx = ctx + doc.getTextWidth(atTxt);
+    doc.setFont('helvetica','bold'); setC(NAVY); doc.text(mail, mx, my);
+    const mailW = doc.getTextWidth(mail);
+    doc.setDrawColor(...GOLD); doc.setLineWidth(0.4); doc.line(mx, my+0.9, mx+mailW, my+0.9);
+    doc.link(mx, my-cst*0.75, mailW, cst, {url:'mailto:'+mail});
+    y += CTA_H + CTA_GAP;
+  }
 
   // bloc WeNego (même contenu que le pied de la page résultat)
   {
-    const y0 = BOTTOM - ABOUT_H, H = ABOUT_H, tw = CW*0.52;
+    const y0 = y, H = ABOUT_H, tw = CW*0.52;
     doc.setFillColor(...NAVY); doc.roundedRect(M, y0, CW, ABOUT_H, 2, 2, 'F');
-    // texte
     doc.setFont('helvetica','normal'); doc.setFontSize(7.6); setC(WHITE);
     const lines = doc.splitTextToSize(T(U.about.text), tw-8), st = stepOf(7.6,1.3);
     let ty = y0 + (H - lines.length*st)/2 + st*0.75;
     lines.forEach(l=>{ doc.text(l, M+5, ty); ty+=st; });
-    // chiffres clés
     const sx = M + tw + 2;
     doc.setDrawColor(70,85,115); doc.setLineWidth(0.3); doc.line(sx-2, y0+4, sx-2, y0+H-4);
     U.about.stats.forEach((s,i)=>{
@@ -1400,43 +1442,13 @@ function renderPdf(p,k){
       doc.setFont('helvetica','bold'); doc.setFontSize(8); setC(GOLD); doc.text(T(s[0]), sx+2, yy);
       doc.setFont('helvetica','normal'); doc.setFontSize(7.4); setC(PALE); doc.text(T(s[1]), sx+14, yy);
     });
-    // bouton + lien
     const label = T(U.about.cta);
     doc.setFont('helvetica','bold'); doc.setFontSize(8);
     const bw = doc.getTextWidth(label)+8, bx = M+CW-5-bw, by = y0+H/2-3.5;
     doc.setFillColor(...GOLD); doc.roundedRect(bx, by, bw, 7, 3.5, 3.5, 'F');
     setC(NAVY); doc.text(label, bx+4, by+4.8);
     doc.link(bx, by, bw, 7, {url: U.about.url});
-  }
-
-  // V24 : carte CTA « échange gratuit de 30 min » (blanche, bordure dorée), juste au-dessus du bloc WeNego
-  {
-    const cy0 = BOTTOM - ABOUT_H - CTA_GAP - CTA_H;
-    doc.setFillColor(...WHITE); doc.setDrawColor(...GOLD); doc.setLineWidth(0.6);
-    doc.roundedRect(M, cy0, CW, CTA_H, 2, 2, 'FD');
-    // pastille icône
-    const ic = M+7.5, icy = cy0+CTA_H/2;
-    doc.setFillColor(...SOFT); doc.circle(ic, icy, 3.6, 'F');
-    doc.setDrawColor(...NAVY); doc.setLineWidth(0.4);
-    doc.roundedRect(ic-1.9, icy-1.6, 3.8, 2.6, 0.5, 0.5, 'S');
-    doc.line(ic-1.2, icy+1, ic-1.6, icy+1.9);
-    // texte + email
-    const tx = M+14, cw = CW-14-5, cst = stepOf(8.2,1.3), mail = CONTACT_EMAIL;
-    doc.setFont('helvetica','bold'); doc.setFontSize(8.2);
-    const mailW = doc.getTextWidth(mail);
-    doc.setFont('helvetica','normal');
-    const cl = doc.splitTextToSize(T(U.about.contact), cw);
-    const lastW = doc.getTextWidth(cl[cl.length-1]+' ');
-    const inline = lastW + mailW <= cw;
-    const mailLine = inline ? cl.length-1 : cl.length;
-    const nL = mailLine + 1;
-    const ty0 = cy0 + (CTA_H - nL*cst)/2 + cst*0.75;
-    setC(INK);
-    cl.forEach((l,j)=>doc.text(l, tx, ty0 + j*cst));
-    const mx = inline ? tx+lastW : tx, my = ty0 + mailLine*cst;
-    doc.setFont('helvetica','bold'); setC(NAVY); doc.text(mail, mx, my);
-    doc.setDrawColor(...GOLD); doc.setLineWidth(0.4); doc.line(mx, my+0.9, mx+mailW, my+0.9);
-    doc.link(mx, my-cst*0.75, mailW, cst, {url:'mailto:'+mail});
+    y += ABOUT_H;
   }
 
   // pieds de page
