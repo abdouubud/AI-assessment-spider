@@ -11,6 +11,7 @@
 <!-- V27 : page élargie (accueil 1080px) et plus aérée (marges intérieures, espacements) -->
 <!-- V28 : rapport PDF en mise en page continue (plus d'espaces vides) ; retour à la ligne avant « Contactez-nous à » -->
 <!-- V29 : barre du haut mobile réorganisée (logo + slogan | langue, puis titre en dessous) -->
+<!-- V30 : rapport en PowerPoint (.pptx) au lieu du PDF ; le même fichier est envoyé avec la soumission et joint à l'email contact@wenego.fr -->
 <!-- Logo : lien vers https://www.wenego.fr/?lang=en ou ?lang=fr selon la langue active -->
 <!DOCTYPE html>
 <html lang="en">
@@ -279,6 +280,8 @@
   }
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<!-- V30 : PptxGenJS pour le rapport PowerPoint -->
+<script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"></script>
 </head>
 <body>
 <div class="wrap intro">
@@ -486,7 +489,7 @@ const answers = {};
 const formData = {};
 let lastScores = [], lastGlobal = null;
 // URL du Web App Google Apps Script (Google Sheets). Vide = désactivé.
-const SHEET_URL = 'https://script.google.com/macros/s/AKfycbyW7eOwCp_B_3KFmkV5-Gln1emWDSynQZhhpJnDJwramBGv9i8zXZhi5Su235igK9QnpA/exec';
+const SHEET_URL = 'https://script.google.com/macros/s/AKfycbwN2U0JIs1iq1xLHDy1f1ZNwe683RJ2CIjT7jIX6hkRbdRD_gmD2vygZX4-tmDF8SK12Q/exec';
 const NAX = AXES.length;
 const LAST = NAX + 1;
 
@@ -527,12 +530,12 @@ const UI = {
     gapNote:(a,b)=>`Votre profil est déséquilibré : l'écart entre « ${a} » et « ${b} » risque de freiner vos progrès. Les axes les plus faibles limitent la valeur des plus avancés.`,
     evenNote:"Votre profil est plutôt homogène : vos axes progressent au même rythme, ce qui facilite un déploiement cohérent.",
     incomplete:"Certains axes n'ont pas été renseignés : ils n'apparaissent pas dans le calcul.",
-    formTitle:"Recevez votre rapport en PDF", formSub:"Renseignez vos coordonnées pour télécharger votre rapport : score, diagramme, synthèse, recommandations et accompagnement WeNego.",
+    formTitle:"Recevez votre rapport PowerPoint", formSub:"Renseignez vos coordonnées pour télécharger votre rapport : score, diagramme, synthèse, recommandations et accompagnement WeNego.",
     fFirst:"Prénom", fLast:"Nom", fEmail:"Email professionnel", fCompany:"Entreprise",
     fFeedback:"Votre avis sur ce diagnostic", fFeedbackPh:"Quelque chose à ajouter ? Toute information complémentaire que vous souhaitez nous partager…",
-    fBtn:"Télécharger le rapport PDF", fBusy:"Génération en cours…",
-    fNote:"Votre rapport PDF se télécharge immédiatement. Sous 24 heures, nous vous enverrons également par email un rapport personnalisé.",
-    fDone:"Votre rapport PDF a été téléchargé. Vous recevrez votre rapport personnalisé par email sous 24 heures.",
+    fBtn:"Télécharger le rapport PowerPoint", fBusy:"Génération en cours…",
+    fNote:"Votre rapport PowerPoint se télécharge immédiatement. Sous 24 heures, nous vous enverrons également par email un rapport personnalisé.",
+    fDone:"Votre rapport PowerPoint a été téléchargé. Vous recevrez votre rapport personnalisé par email sous 24 heures.",
     miniLegend:"Votre profil se dessine au fil de vos réponses. Le contour pointillé indique le maximum (5/5) sur chaque axe.",
     miniCount:(n,t)=>`${n} / ${t} axes commencés`,
     about:{text:"WeNego conçoit et anime des ateliers de négociation avancée, du coaching et du conseil pour les équipes achats et commerciales, afin de faire de la négociation une compétence reproductible et mesurable, au ROI immédiat.",
@@ -540,7 +543,7 @@ const UI = {
       cta:"Visiter wenego.fr", url:"https://www.wenego.fr/?lang=fr",
       contact:"Approfondissons vos résultats lors d'un échange gratuit de 30 min et construisons ensemble votre feuille de route IA & négociation.", contactAt:"Contactez-nous à",
       ctaH:"Approfondissons vos résultats",},
-    fErrReq:"Merci de remplir tous les champs obligatoires.", fErrEmail:"Merci de saisir une adresse email valide.", fErrLib:"Le module PDF n'a pas pu se charger. Vérifiez votre connexion et réessayez.",
+    fErrReq:"Merci de remplir tous les champs obligatoires.", fErrEmail:"Merci de saisir une adresse email valide.", fErrLib:"Le module PowerPoint n'a pas pu se charger. Vérifiez votre connexion et réessayez.",
     pdfTitle:"Diagnostic de maturité IA", pdfFor:"Préparé pour", pdfCompany:"Entreprise", pdfEmail:"Email", pdfDate:"Date",
     pdfIntroH:"Introduction",
     pdfIntro:[
@@ -613,12 +616,12 @@ const UI = {
     gapNote:(a,b)=>`Your profile is uneven: the gap between \u201c${a}\u201d and \u201c${b}\u201d may slow your progress. The weakest axes limit the value of the most advanced ones.`,
     evenNote:"Your profile is fairly balanced: your axes are progressing at the same pace, which makes a consistent rollout easier.",
     incomplete:"Some axes were not answered and are left out of the calculation.",
-    formTitle:"Get your PDF report", formSub:"Enter your details to download your report: score, diagram, summary, recommendations and WeNego support.",
+    formTitle:"Get your PowerPoint report", formSub:"Enter your details to download your report: score, diagram, summary, recommendations and WeNego support.",
     fFirst:"First name", fLast:"Last name", fEmail:"Business email", fCompany:"Company",
     fFeedback:"Your feedback on this diagnostic", fFeedbackPh:"Anything to add? Any further information you would like to share…",
-    fBtn:"Download PDF report", fBusy:"Generating…",
-    fNote:"Your PDF report downloads right away. Within 24 hours, we will also email you a personalized report.",
-    fDone:"Your PDF report has been downloaded. You will receive your personalized report by email within 24 hours.",
+    fBtn:"Download PowerPoint report", fBusy:"Generating…",
+    fNote:"Your PowerPoint report downloads right away. Within 24 hours, we will also email you a personalized report.",
+    fDone:"Your PowerPoint report has been downloaded. You will receive your personalized report by email within 24 hours.",
     miniLegend:"Your profile takes shape as you answer. The dashed outline shows the maximum (5/5) on each axis.",
     miniCount:(n,t)=>`${n} / ${t} axes started`,
     about:{text:"WeNego designs and delivers advanced negotiation workshops, coaching and consultancy for procurement, sales and commercial teams, turning negotiation into a repeatable, measurable skill with immediate ROI.",
@@ -626,7 +629,7 @@ const UI = {
       cta:"Visit wenego.fr", url:"https://www.wenego.fr/?lang=en",
       contact:"Let's go deeper into your results in a free 30 min conversation and build your AI & negotiation roadmap.", contactAt:"Contact us at",
       ctaH:"Let's go deeper into your results",},
-    fErrReq:"Please fill in all required fields.", fErrEmail:"Please enter a valid email address.", fErrLib:"The PDF module could not load. Check your connection and try again.",
+    fErrReq:"Please fill in all required fields.", fErrEmail:"Please enter a valid email address.", fErrLib:"The PowerPoint module could not load. Check your connection and try again.",
     pdfTitle:"AI Maturity Diagnostic", pdfFor:"Prepared for", pdfCompany:"Company", pdfEmail:"Email", pdfDate:"Date",
     pdfIntroH:"Introduction",
     pdfIntro:[
@@ -867,7 +870,7 @@ function buildScreens(){
 
   bindRadarCanvas();
   ['fFirst','fLast','fEmail','fCompany','fFeedback'].forEach(id=>{const el=document.getElementById(id); el.addEventListener('input',()=>{formData[id]=el.value; el.classList.remove('err');});});
-  document.getElementById('pdfBtn').addEventListener('click',onPdf);
+  document.getElementById('pdfBtn').addEventListener('click',onReport);   // V30 : rapport PowerPoint
 }
 
 function setLang(lang){
@@ -1123,7 +1126,287 @@ function renderAxes(){
   }).join('');
 }
 
-// ================= formulaire + export PDF =================
+// ================= V30 : rapport PowerPoint =================
+// Remplace le PDF : le même .pptx est téléchargé par l'utilisateur ET envoyé
+// (base64) avec la soumission pour être joint à l'email contact@wenego.fr.
+function ensurePptxLib(){
+  if(typeof PptxGenJS!=='undefined') return Promise.resolve();
+  return new Promise(res=>{
+    const sc=document.createElement('script');
+    sc.src='https://cdnjs.cloudflare.com/ajax/libs/pptxgenjs/3.12.0/pptxgen.bundle.js';
+    sc.onload=()=>res(); sc.onerror=()=>res(); document.head.appendChild(sc);
+    setTimeout(res,10000);
+  });
+}
+function reportFileName(p){
+  const U=UI[LANG];
+  const safe=t=>String(t||'').normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^A-Za-z0-9]+/g,'_').replace(/^_|_$/g,'');
+  return `${U.fileBase}_${safe(p.company)||'Rapport'}_${safe(p.last)}.pptx`;
+}
+function downloadB64(b64, name){
+  const bin=atob(b64), arr=new Uint8Array(bin.length);
+  for(let i=0;i<bin.length;i++) arr[i]=bin.charCodeAt(i);
+  const blob=new Blob([arr],{type:'application/vnd.openxmlformats-officedocument.presentationml.presentation'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=name;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(a.href), 4000);
+}
+async function onReport(){
+  const U=UI[LANG], msg=document.getElementById('fmsg'), btn=document.getElementById('pdfBtn');
+  const ids=['fFirst','fLast','fEmail','fCompany'];
+  const v={}; let missing=false;
+  ids.forEach(id=>{ const el=document.getElementById(id); v[id]=el.value.trim(); formData[id]=el.value; el.classList.toggle('err', !v[id]); if(!v[id]) missing=true; });
+  v.fFeedback = document.getElementById('fFeedback').value.trim();
+  msg.className='fmsg';
+  if(missing){ msg.textContent=U.fErrReq; msg.classList.add('err'); return; }
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v.fEmail)){ document.getElementById('fEmail').classList.add('err'); msg.textContent=U.fErrEmail; msg.classList.add('err'); return; }
+  btn.disabled=true; msg.textContent=U.fBusy; msg.classList.add('busy');
+  const p={first:v.fFirst, last:v.fLast, email:v.fEmail, company:v.fCompany};
+  let report=null;
+  try{
+    await ensurePptxLib();
+    if(typeof PptxGenJS==='undefined'){
+      report={status:'ppt_library_not_loaded'};
+      msg.className='fmsg err'; msg.textContent=U.fErrLib;
+    } else {
+      const fileName=reportFileName(p);
+      const b64=await buildPptx(p).write({outputType:'base64'});
+      downloadB64(b64, fileName);
+      report={b64, fileName};
+      msg.className='fmsg'; msg.textContent=U.fDone;
+    }
+  }catch(e){
+    console.error(e);
+    report={status:'ppt_build_error: '+(e&&e.message?e.message:e)};
+    msg.className='fmsg err'; msg.textContent=U.fErrLib;
+  }
+  logToSheet(v, report);   // la soumission est toujours enregistrée, avec ou sans rapport
+  btn.disabled=false;
+}
+
+function buildPptx(p){
+  const U=UI[LANG], R=REPORT[LANG], A=analysis();
+  const C={navy:'1B2A4A', gold:'C9A227', ink:'2B2F36', muted:'6B7280', line:'E2E5EA', soft:'EDEFF4',
+           white:'FFFFFF', pale:'CDD3E0', cream:'FAF6EA', dot:'D1D5DB'};
+  const PF='Calibri', W=13.333, H=7.5, M=0.6, CW=W-2*M;
+  const date=new Date().toLocaleDateString(LANG==='fr'?'fr-FR':'en-GB',{day:'numeric',month:'long',year:'numeric'});
+  const colon = LANG==='fr' ? ' : ' : ': ';
+  const pptx=new PptxGenJS();
+  pptx.layout='LAYOUT_WIDE'; pptx.title=U.pdfTitle; pptx.company='WeNego'; pptx.author='WeNego';
+
+  // HTML simple (<b>, entités) → texte / runs PptxGenJS
+  const dec=t=>String(t==null?'':t).replace(/&nbsp;/g,' ').replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"').replace(/&#39;/g,"'");
+  const plain=t=>dec(String(t==null?'':t).replace(/<[^>]+>/g,''));
+  const runs=(html, base={})=>{
+    const out=[];
+    String(html==null?'':html).split(/(<b>.*?<\/b>|<strong>.*?<\/strong>)/g).filter(x=>x!=='').forEach(part=>{
+      const b=/^<(b|strong)>/.test(part);
+      out.push({text:plain(part), options:Object.assign({}, base, b?{bold:true, color:C.navy}:{})});
+    });
+    return out;
+  };
+  const para=(arr)=>{ // [{runs}, ...] → un seul tableau de runs avec sauts de paragraphe
+    const out=[]; arr.forEach((r,i)=>{ r.forEach((x,j)=>{ const o=Object.assign({},x.options); if(j===r.length-1 && i<arr.length-1) o.breakLine=true; out.push({text:x.text, options:o}); }); });
+    return out;
+  };
+
+  const slides=[];
+  function newSlide(){
+    const sl=pptx.addSlide(); sl.background={color:C.white}; slides.push(sl);
+    if(LOGO_DATA && LOGO_DATA.startsWith('data:image')){
+      try{ sl.addImage({data:LOGO_DATA, x:M, y:0.3, w:0.36*457/106, h:0.36}); }catch(e){}
+    } else {
+      sl.addText('WeNego',{x:M,y:0.28,w:2,h:0.4,fontFace:PF,fontSize:18,bold:true,color:C.gold,margin:0});
+    }
+    sl.addText('Empowering people & organisations',{x:M,y:0.7,w:4,h:0.22,fontFace:PF,fontSize:9,color:C.muted,margin:0});
+    return sl;
+  }
+  function title(sl, text, sub){
+    sl.addText(plain(text),{x:M,y:1.05,w:CW,h:0.55,fontFace:PF,fontSize:26,bold:true,color:C.navy,margin:0});
+    sl.addShape(pptx.ShapeType.rect,{x:M,y:1.66,w:0.8,h:0.06,fill:{color:C.gold},line:{color:C.gold,width:0}});
+    if(sub) sl.addText(plain(sub),{x:M,y:1.8,w:CW,h:0.35,fontFace:PF,fontSize:13,italic:true,color:C.muted,margin:0});
+  }
+  // En-tête d'axe : bandeau gris, numéro doré, nom, score à droite
+  function axisBar(sl, x, y, w, h, n, name, right, prio){
+    sl.addShape(pptx.ShapeType.roundRect,{x,y,w,h,fill:{color:C.soft},line:{color:C.soft,width:0},rectRadius:0.06});
+    if(prio) sl.addShape(pptx.ShapeType.rect,{x,y,w:0.07,h,fill:{color:C.gold},line:{color:C.gold,width:0}});
+    sl.addText([{text:n+'. ',options:{color:C.gold}},{text:plain(name),options:{color:C.navy}}],
+      {x:x+0.2,y,w:w-2.6,h,fontFace:PF,fontSize:14,bold:true,valign:'middle',margin:0,fit:'shrink'});
+    sl.addText(right,{x:x+w-2.5,y,w:2.35,h,fontFace:PF,fontSize:12,bold:true,color:C.gold,align:'right',valign:'middle',margin:0});
+  }
+  const scoreTxt=i=>plain(U.yourScore)+colon+fmtScore(lastScores[i])+' / 5';
+
+  // ---- 1. Couverture ----
+  {
+    const sl=newSlide();
+    sl.addText(plain(U.pdfTitle),{x:M,y:1.0,w:CW,h:0.7,fontFace:PF,fontSize:34,bold:true,color:C.navy,align:'center',margin:0});
+    let y=1.85;
+    if(HERO_SRC){
+      const hw=CW, hh=hw*533/1600;
+      try{ sl.addImage({data:HERO_SRC, x:M, y, w:hw, h:hh}); y+=hh+0.25; }catch(e){}
+    }
+    const info=[[U.pdfFor,p.first+' '+p.last],[U.pdfCompany,p.company],[U.pdfEmail,p.email],[U.pdfDate,date]];
+    const cw4=CW/4;
+    sl.addShape(pptx.ShapeType.roundRect,{x:M,y,w:CW,h:0.8,fill:{color:C.white},line:{color:C.line,width:1},rectRadius:0.08});
+    info.forEach((r,i)=>{
+      sl.addText([{text:plain(r[0]).toUpperCase(),options:{fontSize:9,bold:true,color:C.muted,breakLine:true}},{text:plain(r[1]),options:{fontSize:13,bold:true,color:C.navy}}],
+        {x:M+0.25+i*cw4,y,w:cw4-0.35,h:0.8,fontFace:PF,valign:'middle',margin:0,fit:'shrink'});
+    });
+  }
+
+  // ---- 2. Introduction ----
+  {
+    const sl=newSlide(); title(sl, U.pdfIntroH);
+    const body=para(U.pdfIntro.map(t=>runs(t,{color:C.ink})));
+    sl.addText(body,{x:M,y:2.0,w:CW,h:1.9,fontFace:PF,fontSize:15,valign:'top',margin:0,paraSpaceAfter:6,fit:'shrink'});
+    const bl=U.introAxes.map((t,i)=>runs(t,{color:C.ink}).map((x,j,arr)=>({text:x.text,options:Object.assign({},x.options, (j===arr.length-1&&i<U.introAxes.length-1)?{breakLine:true}:{})})));
+    sl.addText([].concat(...bl),{x:M,y:4.0,w:CW,h:2.8,fontFace:PF,fontSize:15,valign:'top',margin:0,paraSpaceAfter:4,fit:'shrink'});
+  }
+
+  // ---- 3. Résultats : diagramme + score global + tableau ----
+  {
+    const sl=newSlide(); title(sl, U.summaryH);
+    const off=document.createElement('canvas'); drawRadarChart(off, lastScores, 1300, 1120, 46);
+    const ih=4.75, iw=ih*1300/1120;
+    sl.addImage({data:off.toDataURL('image/png'), x:M, y:2.0, w:iw, h:ih});
+    sl.addShape(pptx.ShapeType.roundRect,{x:M,y:2.0,w:iw,h:ih,fill:{type:'none'},line:{color:C.line,width:1},rectRadius:0.08});
+    const x0=M+iw+0.45, w=CW-iw-0.45;
+    // carte score global
+    const lvl = lastGlobal==null ? null : levelOf(lastGlobal);
+    sl.addShape(pptx.ShapeType.roundRect,{x:x0,y:2.0,w,h:1.1,fill:{color:C.soft},line:{color:C.soft,width:0},rectRadius:0.08});
+    sl.addShape(pptx.ShapeType.rect,{x:x0,y:2.0,w:0.08,h:1.1,fill:{color:C.gold},line:{color:C.gold,width:0}});
+    sl.addText([{text:plain(U.resultTitle).toUpperCase(),options:{fontSize:10,bold:true,color:C.muted,breakLine:true}},{text:fmtScore(lastGlobal)+' / 5',options:{fontSize:28,bold:true,color:C.gold}}],
+      {x:x0+0.3,y:2.0,w:w/2,h:1.1,fontFace:PF,valign:'middle',margin:0});
+    if(lvl!=null) sl.addText([{text:plain(U.levelLbl).toUpperCase(),options:{fontSize:10,bold:true,color:C.muted,breakLine:true}},{text:plain(U.levels[lvl]),options:{fontSize:20,bold:true,color:C.navy}}],
+      {x:x0+w/2,y:2.0,w:w/2-0.3,h:1.1,fontFace:PF,align:'right',valign:'middle',margin:0});
+    // tableau des axes
+    let ty=3.35;
+    const bx=x0+2.6, bw=w-2.6-2.4;
+    sl.addText(plain(U.colAxis).toUpperCase(),{x:x0,y:ty,w:2.4,h:0.3,fontFace:PF,fontSize:10,bold:true,color:C.muted,margin:0});
+    sl.addText(plain(U.colScore).toUpperCase(),{x:bx,y:ty,w:bw,h:0.3,fontFace:PF,fontSize:10,bold:true,color:C.muted,margin:0});
+    sl.addText(plain(U.colLevel).toUpperCase(),{x:x0+w-1.6,y:ty,w:1.6,h:0.3,fontFace:PF,fontSize:10,bold:true,color:C.muted,align:'right',margin:0});
+    ty+=0.36;
+    sl.addShape(pptx.ShapeType.line,{x:x0,y:ty,w,h:0,line:{color:C.line,width:1}});
+    const rh=0.5;
+    A.rows.forEach(r=>{
+      sl.addText((r.i+1)+'. '+plain(r.name),{x:x0,y:ty,w:2.5,h:rh,fontFace:PF,fontSize:13,bold:true,color:C.navy,valign:'middle',margin:0});
+      sl.addShape(pptx.ShapeType.roundRect,{x:bx,y:ty+rh/2-0.07,w:bw,h:0.14,fill:{color:C.soft},line:{color:C.soft,width:0},rectRadius:0.07});
+      if(r.v!=null) sl.addShape(pptx.ShapeType.roundRect,{x:bx,y:ty+rh/2-0.07,w:Math.max(0.14,bw*r.v/5),h:0.14,fill:{color:C.gold},line:{color:C.gold,width:0},rectRadius:0.07});
+      sl.addText(fmtScore(r.v),{x:bx+bw+0.1,y:ty,w:0.7,h:rh,fontFace:PF,fontSize:12,bold:true,color:C.ink,valign:'middle',margin:0});
+      sl.addText(r.v==null?'—':plain(U.levels[levelOf(r.v)]),{x:x0+w-1.6,y:ty,w:1.6,h:rh,fontFace:PF,fontSize:12,color:C.muted,align:'right',valign:'middle',margin:0});
+      ty+=rh; sl.addShape(pptx.ShapeType.line,{x:x0,y:ty,w,h:0,line:{color:C.line,width:0.75}});
+    });
+    sl.addText(plain(U.pdfDiagramNote),{x:x0,y:ty+0.1,w,h:0.45,fontFace:PF,fontSize:10.5,italic:true,color:C.muted,valign:'top',margin:0,fit:'shrink'});
+  }
+
+  // ---- 4. Synthèse : niveau, équilibre, points forts / axes prioritaires ----
+  {
+    const sl=newSlide(); title(sl, LANG==='fr'?'Synthèse':'Summary');
+    const lvl = lastGlobal==null ? null : levelOf(lastGlobal);
+    const lines=[];
+    if(lvl!=null) lines.push(runs('<b>'+plain(U.levels[lvl])+'</b> — '+U.levelDesc[lvl],{color:C.ink}));
+    if(A.balance) lines.push(runs(A.balance,{color:C.ink}));
+    if(A.incomplete) lines.push(runs(U.incomplete,{color:C.muted,italic:true}));
+    if(lines.length) sl.addText(para(lines),{x:M,y:2.0,w:CW,h:1.6,fontFace:PF,fontSize:16,valign:'top',margin:0,paraSpaceAfter:8,fit:'shrink'});
+    const colW=(CW-0.4)/2, by=3.85, bh=2.85;
+    const box=(ttl, arr, x, accent)=>{
+      sl.addShape(pptx.ShapeType.roundRect,{x,y:by,w:colW,h:bh,fill:{color:C.white},line:{color:C.line,width:1},rectRadius:0.1});
+      sl.addShape(pptx.ShapeType.rect,{x,y:by+0.15,w:0.07,h:bh-0.3,fill:{color:accent},line:{color:accent,width:0}});
+      sl.addText(plain(ttl).toUpperCase(),{x:x+0.3,y:by+0.2,w:colW-0.5,h:0.4,fontFace:PF,fontSize:12,bold:true,color:C.muted,margin:0});
+      arr.forEach((r,j)=>{
+        const yy=by+0.75+j*0.85;
+        sl.addText((r.i+1)+'. '+plain(r.name),{x:x+0.3,y:yy,w:colW-0.6,h:0.4,fontFace:PF,fontSize:18,bold:true,color:C.navy,margin:0});
+        sl.addText(fmtScore(r.v)+' / 5 · '+plain(U.levels[levelOf(r.v)]),{x:x+0.3,y:yy+0.38,w:colW-0.6,h:0.35,fontFace:PF,fontSize:13,color:C.ink,margin:0});
+      });
+    };
+    if(A.strengths.length) box(U.strengthsH, A.strengths, M, C.gold);
+    if(A.priorities.length) box(U.prioritiesH, A.priorities, M+colW+0.4, C.navy);
+  }
+
+  // ---- 5-6. Les 6 axes expliqués (3 par diapo) ----
+  for(let pg=0; pg<2; pg++){
+    const sl=newSlide(); title(sl, U.pdfAxesH+' ('+(pg+1)+'/2)');
+    const ch=(H-0.75-2.0-0.3)/3;
+    [0,1,2].forEach(j=>{
+      const i=pg*3+j, e=U.explains[i]; if(!e) return;
+      const y=2.0+j*(ch+0.15);
+      axisBar(sl, M, y, CW, 0.42, i+1, e.sum, scoreTxt(i));
+      const body=para([[{text:plain(U.kDef)+' ',options:{bold:true,color:C.navy}}].concat(runs(e.def,{color:C.ink})),
+                       [{text:plain(U.kEx)+' ',options:{bold:true,color:C.navy}}].concat(runs(e.ex,{color:C.ink})),
+                       [{text:plain(U.kCrit)+' ',options:{bold:true,color:C.navy}}].concat(runs(e.crit,{color:C.ink}))]);
+      sl.addText(body,{x:M+0.2,y:y+0.48,w:CW-0.4,h:ch-0.5,fontFace:PF,fontSize:12,valign:'top',margin:0,paraSpaceAfter:2,fit:'shrink'});
+    });
+  }
+
+  // ---- 7-12. Questions et réponses (un axe par diapo) ----
+  AXES.forEach((ax,i)=>{
+    const sl=newSlide(); title(sl, U.pdfQAH+' — '+(i+1)+'/'+AXES.length, i===0?U.pdfQASub:null);
+    const top = i===0 ? 2.3 : 2.0;
+    axisBar(sl, M, top, CW, 0.45, i+1, L(ax.label), scoreTxt(i));
+    const n=ax.questions.length, avail=H-0.75-(top+0.6), qh=avail/n;
+    ax.questions.forEach((q,j)=>{
+      const v=answers[q.n], opts=L(q.o), y=top+0.6+j*qh;
+      sl.addText(plain(U.qPrefix+q.n+'. '+L(q.t)),{x:M+0.1,y,w:CW-0.2,h:qh*0.45,fontFace:PF,fontSize:13,bold:true,color:C.navy,valign:'bottom',margin:0,fit:'shrink'});
+      sl.addShape(pptx.ShapeType.ellipse,{x:M+0.25,y:y+qh*0.5+0.06,w:0.14,h:0.14,fill:{color:v?C.gold:C.dot},line:{color:v?C.gold:C.dot,width:0}});
+      sl.addText(plain(v?opts[v-1]:U.pdfQANone),{x:M+0.55,y:y+qh*0.45,w:CW-1.9,h:qh*0.42,fontFace:PF,fontSize:12.5,italic:!v,color:v?C.ink:C.muted,valign:'top',margin:0,fit:'shrink'});
+      if(v) sl.addText(v+' / 4',{x:M+CW-1.3,y:y+qh*0.45,w:1.2,h:0.3,fontFace:PF,fontSize:12.5,bold:true,color:C.gold,align:'right',margin:0});
+      if(j<n-1) sl.addShape(pptx.ShapeType.line,{x:M+0.1,y:y+qh-0.04,w:CW-0.2,h:0,line:{color:C.line,width:0.75}});
+    });
+  });
+
+  // ---- 13-14. Recommandations (3 par diapo) ----
+  for(let pg=0; pg<2; pg++){
+    const sl=newSlide(); title(sl, R.recH+' ('+(pg+1)+'/2)', pg===0?R.recSub:null);
+    const top=pg===0?2.3:2.0, cw=(CW-0.6)/3, ch=H-0.75-top;
+    [0,1,2].forEach(j=>{
+      const i=pg*3+j, r=R.rec[i]; if(!r) return;
+      const x=M+j*(cw+0.3), prio=A.priorities.some(z=>z.i===i);
+      sl.addShape(pptx.ShapeType.roundRect,{x,y:top,w:cw,h:ch,fill:{color:C.white},line:{color:prio?C.gold:C.line,width:prio?2:1},rectRadius:0.1});
+      sl.addText([{text:(i+1)+'. ',options:{color:C.gold}},{text:plain(r.t),options:{color:C.navy}}],{x:x+0.25,y:top+0.15,w:cw-0.5,h:0.45,fontFace:PF,fontSize:16,bold:true,valign:'top',margin:0,fit:'shrink'});
+      sl.addText((prio?plain(R.prioTag)+'  ·  ':'')+fmtScore(lastScores[i])+' / 5',{x:x+0.25,y:top+0.6,w:cw-0.5,h:0.3,fontFace:PF,fontSize:11,bold:true,color:C.gold,margin:0});
+      sl.addText(plain(r.s),{x:x+0.25,y:top+0.92,w:cw-0.5,h:0.6,fontFace:PF,fontSize:12,bold:true,italic:true,color:C.ink,valign:'top',margin:0,fit:'shrink'});
+      const items=r.items.map((t,k)=>({text:plain(t),options:{bullet:{code:'25CF'},color:C.ink,breakLine:k<r.items.length-1}}));
+      sl.addText(items,{x:x+0.25,y:top+1.55,w:cw-0.45,h:ch-1.7,fontFace:PF,fontSize:12,valign:'top',margin:0,paraSpaceAfter:5,fit:'shrink'});
+    });
+  }
+
+  // ---- 15. CTA contact + bloc WeNego ----
+  {
+    const sl=newSlide(); const a=U.about;
+    const cy=1.7, ch=1.35;
+    sl.addShape(pptx.ShapeType.roundRect,{x:M,y:cy,w:CW,h:ch,fill:{color:C.white},line:{color:C.gold,width:2},rectRadius:0.15});
+    sl.addShape(pptx.ShapeType.ellipse,{x:M+0.35,y:cy+ch/2-0.35,w:0.7,h:0.7,fill:{color:C.soft},line:{color:C.soft,width:0}});
+    sl.addShape(pptx.ShapeType.roundRect,{x:M+0.53,y:cy+ch/2-0.17,w:0.34,h:0.26,fill:{color:C.soft},line:{color:C.navy,width:1.25},rectRadius:0.04});
+    sl.addText([
+      {text:plain(a.contact),options:{color:C.ink,breakLine:true}},
+      {text:plain(a.contactAt)+' ',options:{color:C.ink}},
+      {text:CONTACT_EMAIL,options:{bold:true,color:C.navy,underline:{style:'sng',color:C.gold},hyperlink:{url:'mailto:'+CONTACT_EMAIL}}}
+    ],{x:M+1.35,y:cy,w:CW-1.65,h:ch,fontFace:PF,fontSize:17,valign:'middle',margin:0,lineSpacingMultiple:1.2});
+    const by=cy+ch+0.3, bh=2.4, tw=CW*0.46;
+    sl.addShape(pptx.ShapeType.roundRect,{x:M,y:by,w:CW,h:bh,fill:{color:C.navy},line:{color:C.navy,width:0},rectRadius:0.15});
+    sl.addText(plain(a.text),{x:M+0.5,y:by,w:tw-0.5,h:bh,fontFace:PF,fontSize:15,color:C.white,valign:'middle',margin:0,lineSpacingMultiple:1.2});
+    const sx=M+tw+0.35;
+    sl.addShape(pptx.ShapeType.line,{x:sx-0.2,y:by+0.45,w:0,h:bh-0.9,line:{color:'465573',width:1}});
+    a.stats.forEach((st,i)=>{
+      const yy=by+0.45+i*0.52;
+      sl.addText(plain(st[0]),{x:sx+0.1,y:yy,w:1.2,h:0.45,fontFace:PF,fontSize:17,bold:true,color:C.gold,valign:'middle',margin:0});
+      sl.addText(plain(st[1]),{x:sx+1.35,y:yy,w:2.6,h:0.45,fontFace:PF,fontSize:15,color:C.pale,valign:'middle',margin:0});
+    });
+    const btnW=2.5, btnH=0.6, bx=M+CW-0.45-btnW;
+    sl.addShape(pptx.ShapeType.roundRect,{x:bx,y:by+bh/2-btnH/2,w:btnW,h:btnH,fill:{color:C.gold},line:{color:C.gold,width:0},rectRadius:0.3});
+    sl.addText(plain(a.cta)+' →',{x:bx,y:by+bh/2-btnH/2,w:btnW,h:btnH,fontFace:PF,fontSize:15,bold:true,color:C.navy,align:'center',valign:'middle',margin:0,hyperlink:{url:a.url}});
+  }
+
+  // Pied de page sur chaque diapo : mention + numéro « n / total »
+  slides.forEach((sl,i)=>{
+    sl.addShape(pptx.ShapeType.line,{x:M,y:H-0.5,w:CW,h:0,line:{color:C.line,width:0.75}});
+    sl.addText(plain(U.pdfFooter)+'  ·  '+plain(p.first+' '+p.last)+' — '+date,{x:M,y:H-0.45,w:10,h:0.3,fontFace:PF,fontSize:9,color:C.muted,margin:0});
+    sl.addText((i+1)+' / '+slides.length,{x:W-M-1.2,y:H-0.45,w:1.2,h:0.3,fontFace:PF,fontSize:9,color:C.muted,align:'right',margin:0});
+  });
+  return pptx;
+}
+
+// ================= formulaire + export PDF (ancienne version, conservée mais plus utilisée) =================
 function onPdf(){
   const U=UI[LANG], msg=document.getElementById('fmsg'), btn=document.getElementById('pdfBtn');
   const ids=['fFirst','fLast','fEmail','fCompany'];
@@ -1144,13 +1427,16 @@ function onPdf(){
     btn.disabled=false;
   },30);
 }
-function logToSheet(v){
+function logToSheet(v, report){
   if(!SHEET_URL) return;
   const r2=x=>x==null?'':Math.round(x*100)/100;
   const payload={ firstName:v.fFirst, lastName:v.fLast, email:v.fEmail, company:v.fCompany, lang:LANG,
     global:r2(lastGlobal), level: lastGlobal==null?'':UI.en.levels[levelOf(lastGlobal)],
     feedback:v.fFeedback||'', scores:{}, answers:{} };
   AXES.forEach((ax,i)=>{ payload.scores[ax.key]=r2(lastScores[i]); ax.questions.forEach(q=>{ payload.answers['Q'+q.n]=answers[q.n]||''; }); });
+  // V30 : rapport PowerPoint (base64) joint à l'email par le script Apps Script ; reportStatus explique son absence
+  payload.reportStatus = (report && report.status) || 'not_generated';
+  if(report && report.b64){ payload.reportB64=report.b64; payload.reportFileName=report.fileName; payload.reportStatus='attached'; }
   fetch(SHEET_URL,{method:'POST', mode:'no-cors', headers:{'Content-Type':'text/plain;charset=utf-8'}, body:JSON.stringify(payload)}).catch(()=>{});
 }
 // V18 : rapport PDF en 3 pages fixes — 1) intro + diagramme + synthèse, 2) les 6 axes, 3) recommandations + bloc WeNego.
