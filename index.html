@@ -10,6 +10,7 @@
 <!-- V26 : slogan « Empowering people & organisations » sous le logo ; bloc WeNego (texte, chiffres, lien) ajouté sur la page d'accueil sous le bouton Commencer -->
 <!-- V27 : page élargie (accueil 1080px) et plus aérée (marges intérieures, espacements) -->
 <!-- V28 : rapport PDF en mise en page continue (plus d'espaces vides) ; retour à la ligne avant « Contactez-nous à » -->
+<!-- V29 : barre du haut mobile réorganisée (logo + slogan | langue, puis titre en dessous) -->
 <!-- Logo : lien vers https://www.wenego.fr/?lang=en ou ?lang=fr selon la langue active -->
 <!DOCTYPE html>
 <html lang="en">
@@ -66,11 +67,15 @@
   .topbar .brand .tagline{font-size:11px; font-weight:600; letter-spacing:.2px; color:var(--muted); white-space:nowrap; line-height:1.1}
   .topbar .tb-title{grid-column:2; text-align:center; font-size:var(--fs-title); font-weight:800; color:var(--navy); line-height:1.2; white-space:nowrap}
   .topbar .langbar{grid-column:3; justify-self:end}
-  @media (max-width:560px){
-    .topbar{grid-template-columns:auto 1fr auto; gap:8px; padding:8px 10px}
-    .topbar .brand .logo{height:18px}
-    .topbar .brand .tagline{font-size:9px}
-    .topbar .tb-title{white-space:normal}
+  /* V29 : mobile — ligne 1 : logo + slogan | langue ; ligne 2 : titre centré */
+  @media (max-width:700px){
+    .topbar{grid-template-columns:minmax(0,1fr) auto; grid-template-areas:"brand lang" "title title"; row-gap:10px; column-gap:10px; padding:10px 12px}
+    .topbar .brand{grid-area:brand; min-width:0}
+    .topbar .langbar{grid-area:lang}
+    .topbar .tb-title{grid-area:title; white-space:normal; padding-top:9px; border-top:1px solid var(--line)}
+    .topbar .brand .logo{height:20px}
+    .topbar .brand .tagline{font-size:10px; white-space:normal}
+    .topbar .langbar button{padding:5px 11px}
   }
 
   /* bouton Accueil */
