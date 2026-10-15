@@ -14,6 +14,7 @@
 <!-- V30 : rapport en PowerPoint (.pptx) au lieu du PDF ; le même fichier est envoyé avec la soumission et joint à l'email contact@wenego.fr -->
 <!-- V31 : retour au rapport PDF ; le même PDF est envoyé avec la soumission et joint à l'email contact@wenego.fr. logo et image d'accueil intégrés (data URI), aucun fichier image externe -->
 <!-- V32 : rapport PDF — uniquement la réponse choisie (sans note /4) ; « Contactez-nous à » sur la même ligne que « … IA & négociation. » (page + PDF) ; réponses envoyées en texte au Google Sheet / email -->
+<!-- V33 : rapport PDF — les questions non répondues (et les axes sans aucune réponse) ne figurent pas dans « Questions et réponses » -->
 <!-- Logo : lien vers https://www.wenego.fr/?lang=en ou ?lang=fr selon la langue active -->
 <!DOCTYPE html>
 <html lang="en">
@@ -1357,6 +1358,8 @@ function renderPdf(p,k){
   h2(U.pdfQAH);
   para(U.pdfQASub, 8.4, MUTED, 'italic'); y+=1.6*k;
   AXES.forEach((ax,i)=>{
+    const answered = ax.questions.filter(q=>answers[q.n]);   // V33 : questions sautées exclues
+    if(!answered.length) return;
     const bh = 6.4*k;
     ensure(bh + 14*k);                       // en-tête d'axe + au moins une question
     doc.setFillColor(...SOFT); doc.roundedRect(M, y, CW, bh, 1.5, 1.5, 'F');
@@ -1365,7 +1368,7 @@ function renderPdf(p,k){
     doc.setFontSize(8.6*k); setC(GOLD);
     doc.text(T(U.yourScore)+(LANG==='fr'?' : ':': ')+fmtScore(lastScores[i])+' / 5', M+CW-2.5, y+bh*0.68, {align:'right'});
     y += bh + 2*k;
-    ax.questions.forEach(q=>{
+    answered.forEach(q=>{
       const v = answers[q.n];
       const aText = v ? L(q.o)[v-1] : U.pdfQANone;      // V32 : UNIQUEMENT la réponse choisie
       const qSize = 8.4*k, aSize = 8.4*k, qx = M+2, ax0 = M+6, aw = CW-8;
