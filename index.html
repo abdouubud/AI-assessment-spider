@@ -15,6 +15,8 @@
 <!-- V31 : retour au rapport PDF ; le même PDF est envoyé avec la soumission et joint à l'email contact@wenego.fr. logo et image d'accueil intégrés (data URI), aucun fichier image externe -->
 <!-- V32 : rapport PDF — uniquement la réponse choisie (sans note /4) ; « Contactez-nous à » sur la même ligne que « … IA & négociation. » (page + PDF) ; réponses envoyées en texte au Google Sheet / email -->
 <!-- V33 : rapport PDF — les questions non répondues (et les axes sans aucune réponse) ne figurent pas dans « Questions et réponses » -->
+<!-- V34 : légende sous l'image d'accueil (FR/EN) -->
+<!-- V35 : légende de l'image dans la même police que le texte ; « Commentaires complémentaires » / « Additional comments » -->
 <!-- Logo : lien vers https://www.wenego.fr/?lang=en ou ?lang=fr selon la langue active -->
 <!DOCTYPE html>
 <html lang="en">
@@ -141,7 +143,8 @@
   @media (prefers-reduced-motion:reduce){ .screen.active{animation:none} }
 
   /* intro */
-  .hero-visual{display:block; width:100%; height:auto; border-radius:10px; border:1px solid var(--line); background:#fff; margin:0 0 24px}
+  .hero-visual{display:block; width:100%; height:auto; border-radius:10px; border:1px solid var(--line); background:#fff; margin:0 0 8px}
+  .hero-caption{margin:0 0 24px !important}
   .intro p{margin:0 0 16px; line-height:1.65}
   .intro ul{margin:0 0 18px; padding-left:22px}
   .intro li{margin:0 0 10px; line-height:1.6}
@@ -497,7 +500,7 @@ const LAST = NAX + 1;
 // ================= textes d'interface (bilingue) =================
 const UI = {
   fr:{
-    htmlLang:"fr", hTitle:"Diagnostic de maturité IA", miniTitle:"Votre profil en direct", home:"Accueil",
+    htmlLang:"fr", heroCaption:"L’IA offre des possibilités infinies, nous avons choisi des graphismes sympas.", hTitle:"Diagnostic de maturité IA", miniTitle:"Votre profil en direct", home:"Accueil",
     introP:[
       "Bienvenue, et merci de nous accorder les 15 prochaines minutes.",
       "L'intelligence artificielle change en profondeur la manière de <b>préparer et de conduire</b> vos négociations. Où en êtes-vous dans son adoption ? La vraie question n'est pas « faites-vous de l'IA ? », mais « êtes-vous équipé, organisé et prêt à <b>en tirer un avantage concret</b> dans vos négos ? »",
@@ -533,7 +536,7 @@ const UI = {
     incomplete:"Certains axes n'ont pas été renseignés : ils n'apparaissent pas dans le calcul.",
     formTitle:"Recevez votre rapport PDF", formSub:"Renseignez vos coordonnées pour télécharger votre rapport : score, diagramme, synthèse, recommandations et accompagnement WeNego.",
     fFirst:"Prénom", fLast:"Nom", fEmail:"Email professionnel", fCompany:"Entreprise",
-    fFeedback:"Commentaire complémentaire", fFeedbackPh:"Quelque chose à ajouter ? Toute information complémentaire que vous souhaitez nous partager…",
+    fFeedback:"Commentaires complémentaires", fFeedbackPh:"Quelque chose à ajouter ? Toute information complémentaire que vous souhaitez nous partager…",
     fBtn:"Télécharger le rapport PDF", fBusy:"Génération en cours…",
     fNote:"Votre rapport PDF se télécharge immédiatement. Sous 24 heures, nous vous enverrons également par email un rapport personnalisé.",
     fDone:"Votre rapport PDF a été téléchargé. Vous recevrez votre rapport personnalisé par email sous 24 heures.",
@@ -583,7 +586,7 @@ const UI = {
     ]
   },
   en:{
-    htmlLang:"en", hTitle:"AI Maturity Diagnostic", miniTitle:"Your live profile", home:"Home",
+    htmlLang:"en", heroCaption:"AI offers endless possibilities, we chose cool graphics.", hTitle:"AI Maturity Diagnostic", miniTitle:"Your live profile", home:"Home",
     introP:[
       "Welcome, and thank you for giving us the next 15 minutes.",
       "Artificial intelligence is <b>deeply changing</b> the way you <b>prepare and run</b> your negotiations.<br> Where do you stand on adopting it? The real question isn't \u201care you doing AI?\u201d but \u201care you equipped, organized and ready to <b>gain a concrete edge</b> in your negotiations?\u201d",
@@ -619,7 +622,7 @@ const UI = {
     incomplete:"Some axes were not answered and are left out of the calculation.",
     formTitle:"Get your PDF report", formSub:"Enter your details to download your report: score, diagram, summary, recommendations and WeNego support.",
     fFirst:"First name", fLast:"Last name", fEmail:"Business email", fCompany:"Company",
-    fFeedback:"Additional comment", fFeedbackPh:"Anything to add? Any further information you would like to share…",
+    fFeedback:"Additional comments", fFeedbackPh:"Anything to add? Any further information you would like to share…",
     fBtn:"Download PDF report", fBusy:"Generating…",
     fNote:"Your PDF report downloads right away. Within 24 hours, we will also email you a personalized report.",
     fDone:"Your PDF report has been downloaded. You will receive your personalized report by email within 24 hours.",
@@ -793,7 +796,7 @@ function buildScreens(){
   const intro = document.createElement('section');
   intro.className='screen panel intro'; intro.dataset.i='0';
   intro.innerHTML = `
-    ${HERO_SRC ? `<img class="hero-visual" src="${HERO_SRC}" alt="" onerror="this.style.display='none'">` : ''}
+    ${HERO_SRC ? `<img class="hero-visual" src="${HERO_SRC}" alt="" onerror="this.style.display='none'"><p class="hero-caption">${esc(U.heroCaption)}</p>` : ''}
     ${U.introP.map(p=>`<p>${p}</p>`).join('')}
     <ul>${U.introAxes.map(li=>`<li>${li}</li>`).join('')}</ul>
     ${U.introEnd.map(p=>`<p>${p}</p>`).join('')}
