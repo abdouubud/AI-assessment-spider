@@ -13,6 +13,7 @@
 <!-- V29 : barre du haut mobile réorganisée (logo + slogan | langue, puis titre en dessous) -->
 <!-- V30 : rapport en PowerPoint (.pptx) au lieu du PDF ; le même fichier est envoyé avec la soumission et joint à l'email contact@wenego.fr -->
 <!-- V31 : retour au rapport PDF ; le même PDF est envoyé avec la soumission et joint à l'email contact@wenego.fr. logo et image d'accueil intégrés (data URI), aucun fichier image externe -->
+<!-- V32 : rapport PDF — uniquement la réponse choisie (sans note /4) ; « Contactez-nous à » sur la même ligne que « … IA & négociation. » (page + PDF) ; réponses envoyées en texte au Google Sheet / email -->
 <!-- Logo : lien vers https://www.wenego.fr/?lang=en ou ?lang=fr selon la langue active -->
 <!DOCTYPE html>
 <html lang="en">
@@ -551,7 +552,7 @@ const UI = {
     ],
     pdfDiagramH:"Votre diagramme", pdfDiagramNote:"Plus la zone s'étend vers l'extérieur de la toile, plus vous êtes avancé sur l'axe concerné.",
     colAxis:"Axe", colScore:"Score", colLevel:"Niveau",
-    pdfQAH:"Questions et réponses", pdfQASub:"Le détail de vos réponses, question par question. Chaque réponse est notée de 1 (niveau le plus faible) à 4 (niveau le plus avancé).", pdfQANone:"Non renseigné",
+    pdfQAH:"Questions et réponses", pdfQASub:"Le détail de vos réponses, question par question.", pdfQANone:"Non renseigné",
     pdfAxesH:"Les 6 axes expliqués", pdfFooter:"WeNego — Diagnostic de maturité IA — Confidentiel", fileBase:"WeNego_Diagnostic_IA",
     explains:[
       {sum:"Vision — la stratégie",
@@ -637,7 +638,7 @@ const UI = {
     ],
     pdfDiagramH:"Your diagram", pdfDiagramNote:"The further the shape reaches toward the edge of the web, the more advanced you are on that axis.",
     colAxis:"Axis", colScore:"Score", colLevel:"Level",
-    pdfQAH:"Questions and answers", pdfQASub:"The detail of your answers, question by question. Each answer is scored from 1 (lowest level) to 4 (most advanced level).", pdfQANone:"Not answered",
+    pdfQAH:"Questions and answers", pdfQASub:"The detail of your answers, question by question.", pdfQANone:"Not answered",
     pdfAxesH:"The 6 axes explained", pdfFooter:"WeNego — AI Maturity Diagnostic — Confidential", fileBase:"WeNego_AI_Diagnostic",
     explains:[
       {sum:"Vision — strategy",
@@ -860,7 +861,7 @@ function buildScreens(){
     </div>
     <section class="cta-call" aria-label="${escAttr(U.about.ctaH)}">
       <div class="cta-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M8 9h8M8 13h5"/></svg></div>
-      <p>${esc(U.about.contact)}<br>${esc(U.about.contactAt)} <a href="mailto:${CONTACT_EMAIL}">${esc(CONTACT_EMAIL)}</a></p>
+      <p>${esc(U.about.contact)} ${esc(U.about.contactAt)} <a href="mailto:${CONTACT_EMAIL}">${esc(CONTACT_EMAIL)}</a></p>
     </section>
     ${aboutBlock(U)}
   `;
@@ -1163,7 +1164,7 @@ function logToSheet(v, report){
   const payload={ firstName:v.fFirst, lastName:v.fLast, email:v.fEmail, company:v.fCompany, lang:LANG,
     global:r2(lastGlobal), level: lastGlobal==null?'':UI.en.levels[levelOf(lastGlobal)],
     feedback:v.fFeedback||'', scores:{}, answers:{} };
-  AXES.forEach((ax,i)=>{ payload.scores[ax.key]=r2(lastScores[i]); ax.questions.forEach(q=>{ payload.answers['Q'+q.n]=answers[q.n]||''; }); });
+  AXES.forEach((ax,i)=>{ payload.scores[ax.key]=r2(lastScores[i]); ax.questions.forEach(q=>{ const v=answers[q.n]; payload.answers['Q'+q.n]= v ? L(q.o)[v-1] : ''; }); });
   // V31 : rapport PDF (base64) joint à l'email par le script Apps Script ; reportStatus explique son absence
   payload.reportStatus = (report && report.status) || 'not_generated';
   if(report && report.b64){ payload.reportB64=report.b64; payload.reportFileName=report.fileName; payload.reportStatus='attached'; }
@@ -1365,23 +1366,21 @@ function renderPdf(p,k){
     doc.text(T(U.yourScore)+(LANG==='fr'?' : ':': ')+fmtScore(lastScores[i])+' / 5', M+CW-2.5, y+bh*0.68, {align:'right'});
     y += bh + 2*k;
     ax.questions.forEach(q=>{
-      const v = answers[q.n], opts = L(q.o);
-      const qSize = 8.4*k, aSize = 8.2*k, qx = M+2, ax0 = M+9, aw = CW-9-14;
+      const v = answers[q.n];
+      const aText = v ? L(q.o)[v-1] : U.pdfQANone;      // V32 : UNIQUEMENT la réponse choisie
+      const qSize = 8.4*k, aSize = 8.4*k, qx = M+2, ax0 = M+6, aw = CW-8;
       doc.setFont('helvetica','bold'); doc.setFontSize(qSize);
       const qLines = doc.splitTextToSize(T(U.qPrefix+q.n+'. '+L(q.t)), CW-4);
-      doc.setFont('helvetica','normal'); doc.setFontSize(aSize);
-      const aText = v ? opts[v-1] : U.pdfQANone;
+      doc.setFont('helvetica', v ? 'normal' : 'italic'); doc.setFontSize(aSize);
       const aLines = doc.splitTextToSize(T(aText), aw);
       const qs = stepOf(qSize,1.28), as = stepOf(aSize,1.28);
       ensure(qLines.length*qs + aLines.length*as + 3.6*k);
       doc.setFont('helvetica','bold'); doc.setFontSize(qSize); setC(NAVY);
       qLines.forEach(l=>{ doc.text(l, qx, y+qs*0.75); y+=qs; });
       y += 0.6*k;
-      const ay = y;
-      doc.setFillColor(...(v ? GOLD : LINE)); doc.circle(M+5.5, ay+as*0.5, 1.1*k, 'F');
+      doc.setFillColor(...GOLD); doc.rect(M+2, y+0.4, 0.8, aLines.length*as-0.4, 'F');
       doc.setFont('helvetica', v ? 'normal' : 'italic'); doc.setFontSize(aSize); setC(v ? INK : MUTED);
       aLines.forEach(l=>{ doc.text(l, ax0, y+as*0.75); y+=as; });
-      if(v){ doc.setFont('helvetica','bold'); setC(GOLD); doc.text(v+' / 4', M+CW-2.5, ay+as*0.75, {align:'right'}); }
       y += 1.4*k;
       doc.setDrawColor(...LINE); doc.setLineWidth(0.2); doc.line(M+2, y, M+CW-2, y);
       y += 1.6*k;
@@ -1416,9 +1415,22 @@ function renderPdf(p,k){
   // ---------- carte CTA + bloc WeNego, juste après le contenu ----------
   const ABOUT_H = 24, CTA_GAP = 3;
   const cst = stepOf(8.2,1.3), ctx = M+14, ccw = CW-14-5, mail = CONTACT_EMAIL;
-  doc.setFont('helvetica','normal'); doc.setFontSize(8.2);
-  const cl = doc.splitTextToSize(T(U.about.contact), ccw);           // 1re phrase
-  const CTA_H = (cl.length+1)*cst + 6;                                  // + ligne « Contactez-nous à … »
+  // V32 : phrase + « Contactez-nous à » + email dans un seul paragraphe (pas de retour à la ligne forcé)
+  const ctaWords = [];
+  (T(U.about.contact)+' '+T(U.about.contactAt)).split(/\s+/).filter(Boolean).forEach(w=>ctaWords.push({t:w, b:false}));
+  ctaWords.push({t:mail, b:true});
+  const ctaLines = []; {
+    let line=[], lw=0;
+    ctaWords.forEach(w=>{
+      doc.setFont('helvetica', w.b?'bold':'normal'); doc.setFontSize(8.2);
+      const ww = doc.getTextWidth(w.t); doc.setFont('helvetica','normal'); const sp = doc.getTextWidth(' ');
+      const add = (line.length? sp : 0) + ww;
+      if(line.length && lw+add > ccw){ ctaLines.push(line); line=[]; lw=0; }
+      line.push({...w, w:ww, x:(line.length? lw+sp : 0)}); lw += (line.length>1? sp : 0) + ww;
+    });
+    if(line.length) ctaLines.push(line);
+  }
+  const CTA_H = ctaLines.length*cst + 6;
   y += 2;
   ensure(CTA_H + CTA_GAP + ABOUT_H);
 
@@ -1433,16 +1445,20 @@ function renderPdf(p,k){
     doc.roundedRect(ic-1.9, icy-1.6, 3.8, 2.6, 0.5, 0.5, 'S');
     doc.line(ic-1.2, icy+1, ic-1.6, icy+1.9);
     const ty0 = cy0 + 3 + cst*0.75;
-    doc.setFont('helvetica','normal'); doc.setFontSize(8.2); setC(INK);
-    cl.forEach((l,j)=>doc.text(l, ctx, ty0 + j*cst));
-    // V28 : retour à la ligne avant « Contactez-nous à … »
-    const my = ty0 + cl.length*cst, atTxt = T(U.about.contactAt)+' ';
-    doc.text(atTxt, ctx, my);
-    const mx = ctx + doc.getTextWidth(atTxt);
-    doc.setFont('helvetica','bold'); setC(NAVY); doc.text(mail, mx, my);
-    const mailW = doc.getTextWidth(mail);
-    doc.setDrawColor(...GOLD); doc.setLineWidth(0.4); doc.line(mx, my+0.9, mx+mailW, my+0.9);
-    doc.link(mx, my-cst*0.75, mailW, cst, {url:'mailto:'+mail});
+    doc.setFontSize(8.2);
+    ctaLines.forEach((ln,j)=>{
+      const ly = ty0 + j*cst;
+      ln.forEach(w=>{
+        const wx = ctx + w.x;
+        if(w.b){
+          doc.setFont('helvetica','bold'); setC(NAVY); doc.text(w.t, wx, ly);
+          doc.setDrawColor(...GOLD); doc.setLineWidth(0.4); doc.line(wx, ly+0.9, wx+w.w, ly+0.9);
+          doc.link(wx, ly-cst*0.75, w.w, cst, {url:'mailto:'+mail});
+        } else {
+          doc.setFont('helvetica','normal'); setC(INK); doc.text(w.t, wx, ly);
+        }
+      });
+    });
     y += CTA_H + CTA_GAP;
   }
 
